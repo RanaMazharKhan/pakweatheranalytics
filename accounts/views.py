@@ -52,7 +52,7 @@ def register_view(request):
                 messages.success(request, 'Registration successful! Please check your email to verify your account.')
                 return redirect('accounts:verification_sent')
             else:
-                login(request, user)
+                login(request, user, backend='accounts.backends.CaseInsensitiveAuthBackend')
                 messages.success(request, 'Registration successful! Your account is active.')
                 return redirect('weather:dashboard')
     else:
