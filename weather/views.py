@@ -56,7 +56,7 @@ def dashboard_view(request):
         'line_chart_data': json.dumps(line_chart_data) if line_chart_data else None,
         'bar_chart_data': json.dumps(bar_chart_data) if bar_chart_data else None,
         'pie_chart_data': json.dumps(pie_chart_data) if pie_chart_data else None,
-        'preferred_cities': preferred_cities,
+        'preferred_cities': json.dumps(preferred_cities),
     })
 
 
