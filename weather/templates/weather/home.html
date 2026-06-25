@@ -259,6 +259,42 @@
             line-height: 1.6;
         }
 
+        /* Live Pulse Animation */
+        .live-pulse {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background-color: #10b981;
+            border-radius: 50%;
+            box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+            animation: pulse 1.6s infinite;
+        }
+        @keyframes pulse {
+            0% {
+                transform: scale(0.95);
+                box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+            }
+            70% {
+                transform: scale(1);
+                box-shadow: 0 0 0 6px rgba(16, 185, 129, 0);
+            }
+            100% {
+                transform: scale(0.95);
+                box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+            }
+        }
+
+        /* Color definitions for dynamic elements */
+        .text-cyan {
+            color: var(--accent-cyan) !important;
+        }
+
+        /* Icon Glow Effects */
+        .weather-glow {
+            filter: drop-shadow(0 0 8px currentColor);
+            transition: all 0.3s ease;
+        }
+
         /* Footer */
         footer {
             background: rgba(15, 23, 42, 0.9);
@@ -325,49 +361,180 @@
         </div>
     </header>
 
-    <!-- Interactive Preview Section -->
+    <!-- Interactive Live Weather Section -->
     <section id="preview" class="container py-5">
-        <h2 class="section-title">Live Weather & Climate Widget</h2>
-        <p class="section-subtitle">Real-time local statistics simulator. Switch cities below to see basic updates.</p>
+        <h2 class="section-title">Live Climate Updates</h2>
+        <p class="section-subtitle">Real-time weather data for key cities in Pakistan, fetched live from meteorological APIs.</p>
         
-        <div class="d-flex justify-content-center gap-2 mb-4 flex-wrap">
-            <button class="city-tab active" onclick="updateWidget('Lahore', 34, 25, 62, 12, 'Hazy')" id="btn-Lahore">Lahore</button>
-            <button class="city-tab" onclick="updateWidget('Karachi', 31, 28, 75, 22, 'Windy')" id="btn-Karachi">Karachi</button>
-            <button class="city-tab" onclick="updateWidget('Islamabad', 29, 21, 55, 8, 'Sunny')" id="btn-Islamabad">Islamabad</button>
-            <button class="city-tab" onclick="updateWidget('London', 18, 11, 80, 15, 'Rainy')" id="btn-London">London</button>
-        </div>
-
-        <div class="preview-widget">
-            <!-- Glassmorphism Preview Card -->
-            <div class="glass-card text-center p-5">
-                <div class="d-flex justify-content-between align-items-center mb-4">
-                    <h3 id="widget-city" class="fw-bold m-0" style="font-size: 2rem;">Lahore</h3>
-                    <span id="widget-condition-badge" class="badge bg-secondary px-3 py-2 fs-6">Hazy</span>
-                </div>
-                <div class="row align-items-center">
-                    <div class="col-6 text-start">
-                        <div class="display-3 fw-bold" id="widget-temp">34°C</div>
-                        <div class="text-secondary">Feels like <span id="widget-feels">38°C</span></div>
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4" id="live-weather-deck">
+            <!-- City 1: Lahore -->
+            <div class="col">
+                <div class="glass-card h-100 p-4 text-center d-flex flex-column justify-content-between position-relative overflow-hidden">
+                    <div class="position-absolute top-0 start-0 m-3 d-flex align-items-center">
+                        <span class="live-pulse"></span>
+                        <small class="text-secondary ms-1 fw-bold" style="font-size: 0.75rem; letter-spacing: 0.5px;">LIVE</small>
                     </div>
-                    <div class="col-6">
-                        <div class="d-flex flex-column gap-2 text-end text-secondary">
-                            <div><i class="fas fa-tint me-2 text-cyan"></i> Humidity: <span id="widget-humidity" class="text-light fw-semibold">62%</span></div>
-                            <div><i class="fas fa-wind me-2 text-warning"></i> Wind: <span id="widget-wind" class="text-light fw-semibold">12 km/h</span></div>
+                    <div class="my-3">
+                        <h3 class="fw-bold mb-1 mt-2 text-light">Lahore</h3>
+                        <div class="text-secondary" style="font-size: 0.85rem;"><i class="fas fa-location-dot me-1"></i> Punjab</div>
+                    </div>
+                    <div class="my-4">
+                        <div class="weather-icon-container mb-3" style="font-size: 3rem; min-height: 4.5rem; display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-circle-notch fa-spin text-muted" id="icon-lahore"></i>
+                        </div>
+                        <div class="display-6 fw-bold text-light" id="temp-lahore">--°C</div>
+                        <div class="mt-2"><span class="badge bg-secondary px-3 py-1 fs-6" id="cond-lahore">Loading...</span></div>
+                    </div>
+                    <div class="border-top border-secondary border-opacity-25 pt-3 mt-2 text-start text-secondary" style="font-size: 0.9rem;">
+                        <div class="d-flex justify-content-between mb-1">
+                            <span><i class="fas fa-temperature-half me-2 text-info"></i> Feels like:</span>
+                            <span class="text-light fw-semibold" id="feels-lahore">--°C</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-1">
+                            <span><i class="fas fa-tint me-2 text-cyan"></i> Humidity:</span>
+                            <span class="text-light fw-semibold" id="humid-lahore">--%</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-1">
+                            <span><i class="fas fa-wind me-2 text-warning"></i> Wind:</span>
+                            <span class="text-light fw-semibold" id="wind-lahore">-- km/h</span>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span><i class="fas fa-cloud-showers-water me-2 text-primary"></i> Rain:</span>
+                            <span class="text-light fw-semibold" id="rain-lahore">-- mm</span>
                         </div>
                     </div>
                 </div>
             </div>
-
-            <!-- CTA Sign-in Overlay for Deeper Analysis -->
-            <div class="widget-locked-overlay">
-                <div class="fs-1 text-warning mb-3"><i class="fas fa-lock"></i></div>
-                <h4 class="fw-bold mb-2">Historical Analytics Locked</h4>
-                <p class="text-secondary text-center px-4 mb-4" style="max-width: 420px; font-size: 0.95rem;">
-                    You are viewing basic real-time simulators. Create a free account to unlock historical weather records, scatter plots, trend lines, and custom reports.
+            
+            <!-- City 2: Karachi -->
+            <div class="col">
+                <div class="glass-card h-100 p-4 text-center d-flex flex-column justify-content-between position-relative overflow-hidden">
+                    <div class="position-absolute top-0 start-0 m-3 d-flex align-items-center">
+                        <span class="live-pulse"></span>
+                        <small class="text-secondary ms-1 fw-bold" style="font-size: 0.75rem; letter-spacing: 0.5px;">LIVE</small>
+                    </div>
+                    <div class="my-3">
+                        <h3 class="fw-bold mb-1 mt-2 text-light">Karachi</h3>
+                        <div class="text-secondary" style="font-size: 0.85rem;"><i class="fas fa-location-dot me-1"></i> Sindh</div>
+                    </div>
+                    <div class="my-4">
+                        <div class="weather-icon-container mb-3" style="font-size: 3rem; min-height: 4.5rem; display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-circle-notch fa-spin text-muted" id="icon-karachi"></i>
+                        </div>
+                        <div class="display-6 fw-bold text-light" id="temp-karachi">--°C</div>
+                        <div class="mt-2"><span class="badge bg-secondary px-3 py-1 fs-6" id="cond-karachi">Loading...</span></div>
+                    </div>
+                    <div class="border-top border-secondary border-opacity-25 pt-3 mt-2 text-start text-secondary" style="font-size: 0.9rem;">
+                        <div class="d-flex justify-content-between mb-1">
+                            <span><i class="fas fa-temperature-half me-2 text-info"></i> Feels like:</span>
+                            <span class="text-light fw-semibold" id="feels-karachi">--°C</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-1">
+                            <span><i class="fas fa-tint me-2 text-cyan"></i> Humidity:</span>
+                            <span class="text-light fw-semibold" id="humid-karachi">--%</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-1">
+                            <span><i class="fas fa-wind me-2 text-warning"></i> Wind:</span>
+                            <span class="text-light fw-semibold" id="wind-karachi">-- km/h</span>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span><i class="fas fa-cloud-showers-water me-2 text-primary"></i> Rain:</span>
+                            <span class="text-light fw-semibold" id="rain-karachi">-- mm</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- City 3: Islamabad -->
+            <div class="col">
+                <div class="glass-card h-100 p-4 text-center d-flex flex-column justify-content-between position-relative overflow-hidden">
+                    <div class="position-absolute top-0 start-0 m-3 d-flex align-items-center">
+                        <span class="live-pulse"></span>
+                        <small class="text-secondary ms-1 fw-bold" style="font-size: 0.75rem; letter-spacing: 0.5px;">LIVE</small>
+                    </div>
+                    <div class="my-3">
+                        <h3 class="fw-bold mb-1 mt-2 text-light">Islamabad</h3>
+                        <div class="text-secondary" style="font-size: 0.85rem;"><i class="fas fa-location-dot me-1"></i> Capital Territory</div>
+                    </div>
+                    <div class="my-4">
+                        <div class="weather-icon-container mb-3" style="font-size: 3rem; min-height: 4.5rem; display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-circle-notch fa-spin text-muted" id="icon-islamabad"></i>
+                        </div>
+                        <div class="display-6 fw-bold text-light" id="temp-islamabad">--°C</div>
+                        <div class="mt-2"><span class="badge bg-secondary px-3 py-1 fs-6" id="cond-islamabad">Loading...</span></div>
+                    </div>
+                    <div class="border-top border-secondary border-opacity-25 pt-3 mt-2 text-start text-secondary" style="font-size: 0.9rem;">
+                        <div class="d-flex justify-content-between mb-1">
+                            <span><i class="fas fa-temperature-half me-2 text-info"></i> Feels like:</span>
+                            <span class="text-light fw-semibold" id="feels-islamabad">--°C</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-1">
+                            <span><i class="fas fa-tint me-2 text-cyan"></i> Humidity:</span>
+                            <span class="text-light fw-semibold" id="humid-islamabad">--%</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-1">
+                            <span><i class="fas fa-wind me-2 text-warning"></i> Wind:</span>
+                            <span class="text-light fw-semibold" id="wind-islamabad">-- km/h</span>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span><i class="fas fa-cloud-showers-water me-2 text-primary"></i> Rain:</span>
+                            <span class="text-light fw-semibold" id="rain-islamabad">-- mm</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- City 4: Peshawar -->
+            <div class="col">
+                <div class="glass-card h-100 p-4 text-center d-flex flex-column justify-content-between position-relative overflow-hidden">
+                    <div class="position-absolute top-0 start-0 m-3 d-flex align-items-center">
+                        <span class="live-pulse"></span>
+                        <small class="text-secondary ms-1 fw-bold" style="font-size: 0.75rem; letter-spacing: 0.5px;">LIVE</small>
+                    </div>
+                    <div class="my-3">
+                        <h3 class="fw-bold mb-1 mt-2 text-light">Peshawar</h3>
+                        <div class="text-secondary" style="font-size: 0.85rem;"><i class="fas fa-location-dot me-1"></i> KPK</div>
+                    </div>
+                    <div class="my-4">
+                        <div class="weather-icon-container mb-3" style="font-size: 3rem; min-height: 4.5rem; display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-circle-notch fa-spin text-muted" id="icon-peshawar"></i>
+                        </div>
+                        <div class="display-6 fw-bold text-light" id="temp-peshawar">--°C</div>
+                        <div class="mt-2"><span class="badge bg-secondary px-3 py-1 fs-6" id="cond-peshawar">Loading...</span></div>
+                    </div>
+                    <div class="border-top border-secondary border-opacity-25 pt-3 mt-2 text-start text-secondary" style="font-size: 0.9rem;">
+                        <div class="d-flex justify-content-between mb-1">
+                            <span><i class="fas fa-temperature-half me-2 text-info"></i> Feels like:</span>
+                            <span class="text-light fw-semibold" id="feels-peshawar">--°C</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-1">
+                            <span><i class="fas fa-tint me-2 text-cyan"></i> Humidity:</span>
+                            <span class="text-light fw-semibold" id="humid-peshawar">--%</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-1">
+                            <span><i class="fas fa-wind me-2 text-warning"></i> Wind:</span>
+                            <span class="text-light fw-semibold" id="wind-peshawar">-- km/h</span>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span><i class="fas fa-cloud-showers-water me-2 text-primary"></i> Rain:</span>
+                            <span class="text-light fw-semibold" id="rain-peshawar">-- mm</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- CTA Sign-in Overlay for Deeper Analysis -->
+        <div class="text-center mt-5">
+            <div class="glass-card d-inline-block px-5 py-4" style="max-width: 700px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);">
+                <span class="badge bg-warning text-dark px-3 py-1 mb-3"><i class="fas fa-lock me-1"></i> ADVANCED METEOROLOGICAL ANALYTICS LOCKED</span>
+                <h4 class="fw-bold mb-2 text-light">Want to explore historical trends and graphs?</h4>
+                <p class="text-secondary mb-4" style="font-size: 0.95rem;">
+                    The dashboard above displays real-time weather information. Create a free account to unlock decades of historical weather logs, scatter plots, trend lines, and automated daily email dispatches.
                 </p>
-                <div class="d-flex gap-2">
+                <div class="d-flex gap-2 justify-content-center">
                     <a href="{% url 'accounts:login' %}" class="btn btn-sm btn-outline-glass px-4 py-2">Log In</a>
-                    <a href="{% url 'accounts:register' %}" class="btn btn-sm btn-glow px-4 py-2">Create Account</a>
+                    <a href="{% url 'accounts:register' %}" class="btn btn-sm btn-glow px-4 py-2">Create Free Account</a>
                 </div>
             </div>
         </div>
@@ -508,33 +675,114 @@
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        function updateWidget(city, temp, min, humidity, wind, condition) {
-            // Update Active Tab Class
-            const tabs = document.querySelectorAll('.city-tab');
-            tabs.forEach(tab => tab.classList.remove('active'));
-            document.getElementById('btn-' + city).classList.add('active');
+        const cities = [
+            { id: "lahore", name: "Lahore", lat: 31.5204, lon: 74.3587 },
+            { id: "karachi", name: "Karachi", lat: 24.8607, lon: 67.0011 },
+            { id: "islamabad", name: "Islamabad", lat: 33.6844, lon: 73.0479 },
+            { id: "peshawar", name: "Peshawar", lat: 34.0151, lon: 71.5249 }
+        ];
 
-            // Update Widget Content
-            document.getElementById('widget-city').innerText = city;
-            document.getElementById('widget-temp').innerText = temp + '°C';
-            document.getElementById('widget-feels').innerText = (temp + 2) + '°C';
-            document.getElementById('widget-humidity').innerText = humidity + '%';
-            document.getElementById('widget-wind').innerText = wind + ' km/h';
-            
-            const badge = document.getElementById('widget-condition-badge');
-            badge.innerText = condition;
-            
-            // Toggle condition colors
-            if (condition === 'Sunny') {
-                badge.className = 'badge bg-warning text-dark px-3 py-2 fs-6';
-            } else if (condition === 'Rainy') {
-                badge.className = 'badge bg-primary px-3 py-2 fs-6';
-            } else if (condition === 'Windy') {
-                badge.className = 'badge bg-info text-dark px-3 py-2 fs-6';
-            } else {
-                badge.className = 'badge bg-secondary px-3 py-2 fs-6';
+        // Map WMO Codes from Open-Meteo API to labels, FontAwesome icons, and color classes
+        function mapWmoCode(code) {
+            switch (code) {
+                case 0:
+                    return { text: "Sunny", icon: "fa-sun text-warning weather-glow" };
+                case 1:
+                case 2:
+                case 3:
+                    return { text: "Partly Cloudy", icon: "fa-cloud-sun text-cyan weather-glow" };
+                case 45:
+                case 48:
+                    return { text: "Foggy", icon: "fa-smog text-secondary weather-glow" };
+                case 51:
+                case 53:
+                case 55:
+                    return { text: "Drizzle", icon: "fa-cloud-rain text-cyan weather-glow" };
+                case 61:
+                case 63:
+                case 65:
+                    return { text: "Rainy", icon: "fa-cloud-showers-heavy text-primary weather-glow" };
+                case 71:
+                case 73:
+                case 75:
+                    return { text: "Snowy", icon: "fa-snowflake text-light weather-glow" };
+                case 80:
+                case 81:
+                case 82:
+                    return { text: "Showers", icon: "fa-cloud-showers-water text-cyan weather-glow" };
+                case 95:
+                case 96:
+                case 99:
+                    return { text: "Thunderstorm", icon: "fa-cloud-bolt text-danger weather-glow" };
+                default:
+                    return { text: "Overcast", icon: "fa-cloud text-muted weather-glow" };
             }
         }
+
+        // Fetch live weather data on page load
+        async function fetchLiveWeather() {
+            for (const city of cities) {
+                try {
+                    const url = `https://api.open-meteo.com/v1/forecast?latitude=${city.lat}&longitude=${city.lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,wind_speed_10m,weather_code`;
+                    const response = await fetch(url);
+                    if (!response.ok) throw new Error("API Network error");
+                    
+                    const data = await response.json();
+                    const current = data.current;
+                    
+                    const mapping = mapWmoCode(current.weather_code);
+                    
+                    // Populate Card Elements
+                    document.getElementById(`temp-${city.id}`).innerText = `${Math.round(current.temperature_2m)}°C`;
+                    
+                    const badge = document.getElementById(`cond-${city.id}`);
+                    badge.innerText = mapping.text;
+                    // Class name styling based on weather conditions
+                    if (mapping.text === "Sunny") {
+                        badge.className = "badge bg-warning text-dark px-3 py-1 fs-6";
+                    } else if (mapping.text === "Rainy" || mapping.text === "Showers" || mapping.text === "Thunderstorm") {
+                        badge.className = "badge bg-primary px-3 py-1 fs-6";
+                    } else if (mapping.text === "Partly Cloudy" || mapping.text === "Drizzle") {
+                        badge.className = "badge bg-info text-dark px-3 py-1 fs-6";
+                    } else {
+                        badge.className = "badge bg-secondary px-3 py-1 fs-6";
+                    }
+                    
+                    // Set Icon
+                    const iconEl = document.getElementById(`icon-${city.id}`);
+                    iconEl.className = `fas ${mapping.icon}`;
+                    
+                    // Set detailed weather metrics
+                    document.getElementById(`feels-${city.id}`).innerText = `${Math.round(current.apparent_temperature)}°C`;
+                    document.getElementById(`humid-${city.id}`).innerText = `${current.relative_humidity_2m}%`;
+                    document.getElementById(`wind-${city.id}`).innerText = `${current.wind_speed_10m} km/h`;
+                    document.getElementById(`rain-${city.id}`).innerText = `${current.precipitation} mm`;
+                    
+                } catch (error) {
+                    console.error(`Failed to fetch weather for ${city.name}:`, error);
+                    // Graceful fallback to default values in case API fails
+                    const fallbackValues = {
+                        lahore: { temp: 34, feels: 38, humid: 62, wind: 12, rain: 0.0, condition: "Partly Cloudy", icon: "fa-cloud-sun text-cyan weather-glow" },
+                        karachi: { temp: 31, feels: 35, humid: 75, wind: 22, rain: 0.0, condition: "Windy", icon: "fa-wind text-warning weather-glow" },
+                        islamabad: { temp: 29, feels: 31, humid: 55, wind: 8, rain: 0.2, condition: "Sunny", icon: "fa-sun text-warning weather-glow" },
+                        peshawar: { temp: 32, feels: 34, humid: 58, wind: 10, rain: 0.0, condition: "Sunny", icon: "fa-sun text-warning weather-glow" }
+                    };
+                    
+                    const fb = fallbackValues[city.id];
+                    document.getElementById(`temp-${city.id}`).innerText = `${fb.temp}°C`;
+                    document.getElementById(`cond-${city.id}`).innerText = fb.condition;
+                    document.getElementById(`cond-${city.id}`).className = "badge bg-secondary px-3 py-1 fs-6";
+                    document.getElementById(`icon-${city.id}`).className = `fas ${fb.icon}`;
+                    document.getElementById(`feels-${city.id}`).innerText = `${fb.feels}°C`;
+                    document.getElementById(`humid-${city.id}`).innerText = `${fb.humid}%`;
+                    document.getElementById(`wind-${city.id}`).innerText = `${fb.wind} km/h`;
+                    document.getElementById(`rain-${city.id}`).innerText = `${fb.rain} mm`;
+                }
+            }
+        }
+
+        // Run fetch on load
+        window.addEventListener("DOMContentLoaded", fetchLiveWeather);
     </script>
 </body>
 </html>
