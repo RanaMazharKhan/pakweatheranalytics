@@ -139,6 +139,7 @@ EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', '')
 # Gmail app passwords are 16 chars; strip spaces if copied from Google's display format
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '').replace(' ', '')
 DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', EMAIL_HOST_USER)
+EMAIL_TIMEOUT = int(os.getenv('EMAIL_TIMEOUT', 5))
 # Login URLs
 LOGIN_URL = '/accounts/login/'
 LOGIN_REDIRECT_URL = '/weather/dashboard/'
