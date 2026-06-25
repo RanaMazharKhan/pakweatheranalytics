@@ -7,6 +7,9 @@ from django.db.models import Q
 import pandas as pd
 import json
 from datetime import datetime
+import logging
+
+logger = logging.getLogger(__name__)
 
 from .models import WeatherData
 from .forms import WeatherDataForm, CSVUploadForm, SearchFilterForm
@@ -31,7 +34,11 @@ def home_view(request):
 
 @login_required
 def dashboard_view(request):
-    ensure_weather_data()
+    try:
+        ensure_weather_data()
+    except Exception as e:
+        logger.exception("Failed to sync weather data in dashboard_view")
+        messages.warning(request, "Failed to sync historical weather data. You can still use the live dashboard!")
     form = SearchFilterForm(request.GET or None)
     city = request.GET.get('city')
     date_from = request.GET.get('date_from')
