@@ -17,7 +17,20 @@ body{background:linear-gradient(135deg,#1a2a6c,#b21f1f,#fdbb2d);min-height:100vh
 <form method="post">{% csrf_token %}
 <div class="mb-3"><label class="form-label">Username</label>{{ form.username }}</div>
 <div class="mb-3"><label class="form-label">Password</label>{{ form.password }}</div>
-{% if form.non_field_errors %}<div class="alert alert-danger">{% for e in form.non_field_errors %}{{ e }}{% endfor %}</div>{% endif %}
+{% if form.errors %}
+<div class="alert alert-danger p-2" style="border-radius:10px; font-size: 0.85rem;">
+    <ul class="mb-0 ps-3">
+        {% for field in form %}
+            {% for error in field.errors %}
+                <li><strong>{{ field.label }}:</strong> {{ error }}</li>
+            {% endfor %}
+        {% endfor %}
+        {% for error in form.non_field_errors %}
+            <li>{{ error }}</li>
+        {% endfor %}
+    </ul>
+</div>
+{% endif %}
 <button type="submit" class="btn btn-login mt-3"><i class="fas fa-sign-in-alt me-2"></i>Sign In</button>
 </form>
 <div class="register-link">Don't have an account? <a href="{% url 'accounts:register' %}">Register here</a></div>

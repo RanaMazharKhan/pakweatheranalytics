@@ -146,4 +146,9 @@ LOGIN_REDIRECT_URL = '/weather/dashboard/'
 LOGOUT_REDIRECT_URL = '/'
 EMAIL_VERIFICATION_REQUIRED = os.getenv('EMAIL_VERIFICATION_REQUIRED', 'True') == 'True'
 
+AUTHENTICATION_BACKENDS = [
+    'accounts.backends.CaseInsensitiveAuthBackend',
+    'django.contrib.auth.backends.ModelBackend',
+]
+
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
