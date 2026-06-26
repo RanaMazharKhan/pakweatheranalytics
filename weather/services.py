@@ -197,6 +197,8 @@ def needs_weather_sync(max_age_days=1):
     return False, 0
 
 
+import threading
+
 def ensure_weather_data(force=False):
     """Load weather data if the database is empty or outdated."""
     should_sync, days = needs_weather_sync()
@@ -205,3 +207,16 @@ def ensure_weather_data(force=False):
     if should_sync:
         return sync_weather_data(days=days)
     return None
+
+
+def ensure_weather_data_async():
+    """Start weather synchronization in a background thread to prevent blocking web requests."""
+    try:
+        should_sync, days = needs_weather_sync()
+        if should_sync:
+            thread = threading.Thread(target=sync_weather_data, kwargs={'days': days})
+            thread.daemon = True
+            thread.start()
+            logger.info("Started background weather sync thread for %d days", days)
+    except Exception:
+        logger.exception("Failed to start background weather sync thread")

@@ -15,7 +15,7 @@ from .models import WeatherData
 from .forms import WeatherDataForm, CSVUploadForm, SearchFilterForm
 from .utils import get_filtered_data, calculate_statistics, generate_insights, get_chart_data
 from .tasks import send_daily_reports
-from .services import ensure_weather_data
+from .services import ensure_weather_data, ensure_weather_data_async
 
 
 def is_admin(user):
@@ -26,7 +26,7 @@ def home_view(request):
     if request.user.is_authenticated:
         return redirect('weather:dashboard')
     try:
-        ensure_weather_data()
+        ensure_weather_data_async()
     except Exception as e:
         logger.exception("Failed to sync weather data in home_view")
     total_records = WeatherData.objects.count()
@@ -38,7 +38,7 @@ def home_view(request):
 @login_required
 def dashboard_view(request):
     try:
-        ensure_weather_data()
+        ensure_weather_data_async()
     except Exception as e:
         logger.exception("Failed to sync weather data in dashboard_view")
         messages.warning(request, "Failed to sync historical weather data. You can still use the live dashboard!")
@@ -73,7 +73,7 @@ def dashboard_view(request):
 @login_required
 def search_view(request):
     try:
-        ensure_weather_data()
+        ensure_weather_data_async()
     except Exception as e:
         logger.exception("Failed to sync weather data in search_view")
     form = SearchFilterForm(request.GET or None)
@@ -95,7 +95,7 @@ def search_view(request):
 @login_required
 def visualizations_view(request):
     try:
-        ensure_weather_data()
+        ensure_weather_data_async()
     except Exception as e:
         logger.exception("Failed to sync weather data in visualizations_view")
     form = SearchFilterForm(request.GET or None)
@@ -120,7 +120,7 @@ def visualizations_view(request):
 @login_required
 def insights_view(request):
     try:
-        ensure_weather_data()
+        ensure_weather_data_async()
     except Exception as e:
         logger.exception("Failed to sync weather data in insights_view")
     form = SearchFilterForm(request.GET or None)
