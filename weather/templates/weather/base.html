@@ -165,7 +165,7 @@
             border-bottom: 1px solid rgba(255, 255, 255, 0.08);
             padding: 15px 0;
             position: relative;
-            z-index: 2;
+            z-index: 1030;
         }
         
         .navbar-brand { 
@@ -198,6 +198,31 @@
             padding: 40px 0; 
             position: relative;
             z-index: 2;
+        }
+
+        /* Glassmorphic Dropdown Menu */
+        .dropdown-menu {
+            background: rgba(15, 23, 42, 0.95) !important;
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.08) !important;
+            border-radius: 12px !important;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3) !important;
+            padding: 8px 0 !important;
+        }
+        .dropdown-item {
+            color: #f8fafc !important;
+            font-weight: 500;
+            padding: 10px 20px !important;
+            transition: all 0.2s ease;
+        }
+        .dropdown-item:hover {
+            background: rgba(255, 255, 255, 0.1) !important;
+            color: white !important;
+        }
+        .dropdown-divider {
+            border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+            margin: 6px 0 !important;
         }
         
         /* Glassmorphic Cards for Dashboard */
