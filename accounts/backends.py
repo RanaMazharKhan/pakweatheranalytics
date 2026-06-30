@@ -13,8 +13,10 @@ class CaseInsensitiveAuthBackend(ModelBackend):
         
         try:
             # Case-insensitive lookup for username OR email
-            user = User.objects.get(Q(username__iexact=username) | Q(email__iexact=username))
-        except User.DoesNotExist:
+            user = User.objects.filter(Q(username__iexact=username) | Q(email__iexact=username)).first()
+            if user is None:
+                return None
+        except Exception:
             return None
             
         if user.check_password(password) and self.user_can_authenticate(user):

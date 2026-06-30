@@ -128,15 +128,14 @@ def login_view(request):
         return redirect('weather:dashboard')
     
     if request.method == 'POST':
-        form = CustomLoginForm(request, data=request.POST)
-        if form.is_valid():
-            user = form.get_user()
-            if user.is_active:
-                login(request, user)
-                messages.success(request, f'Welcome back, {user.username}!')
-                next_url = request.GET.get('next', 'weather:dashboard')
-                return redirect(next_url)
-            else:
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        
+        # Intercept inactive users with correct credentials to show email verification prompt
+        try:
+            from django.db.models import Q
+            user = User.objects.filter(Q(username__iexact=username) | Q(email__iexact=username)).first()
+            if user and user.check_password(password) and not user.is_active:
                 messages.error(request, 'Please verify your email address before logging in.')
                 try:
                     send_verification_email(request, user)
@@ -146,8 +145,19 @@ def login_view(request):
                         request,
                         'We could not send a verification email. Please check your email settings or contact support.',
                     )
-                    return redirect('accounts:login')
                 return redirect('accounts:verification_sent')
+        except Exception:
+            pass
+
+        form = CustomLoginForm(request, data=request.POST)
+        if form.is_valid():
+            user = form.get_user()
+            login(request, user)
+            messages.success(request, f'Welcome back, {user.username}!')
+            next_url = request.GET.get('next', 'weather:dashboard')
+            if next_url == 'weather:dashboard':
+                return redirect('weather:dashboard')
+            return redirect(next_url)
     else:
         form = CustomLoginForm()
     
