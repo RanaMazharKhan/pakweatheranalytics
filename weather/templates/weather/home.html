@@ -138,13 +138,21 @@
             50% { transform: scale(1.2); opacity: 0.95; }
         }
 
+        html {
+            scroll-behavior: smooth;
+        }
+
         /* Cloudy drifting shapes */
         .cloud-drift {
             position: absolute;
-            background: rgba(255, 255, 255, 0.04);
+            background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.02) 50%, transparent 70%);
+            box-shadow: 
+                inset 10px 10px 30px rgba(255, 255, 255, 0.04),
+                inset -10px -10px 30px rgba(0, 0, 0, 0.2),
+                20px 20px 40px rgba(0, 0, 0, 0.15);
+            border-radius: 50% 50% 40% 40% / 50% 50% 30% 30%;
             filter: blur(15px);
-            border-radius: 50%;
-            animation: drift 45s linear infinite;
+            animation: drift 50s linear infinite;
         }
         @keyframes drift {
             0% { transform: translateX(-300px); }
@@ -473,9 +481,21 @@
                 <img src="{% static 'weather_logo.png' %}" alt="Logo" width="40" height="40" class="d-inline-block align-top me-2" style="border-radius: 50%; border: 1px solid rgba(255,255,255,0.2);">
                 Weather Analytics
             </a>
-            <div class="d-flex gap-2">
-                <a href="{% url 'accounts:login' %}" class="btn btn-sm btn-outline-glass px-3 py-2"><i class="fas fa-sign-in-alt me-1"></i> Log In</a>
-                <a href="{% url 'accounts:register' %}" class="btn btn-sm btn-glow px-3 py-2"><i class="fas fa-user-plus me-1"></i> Sign Up</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#homeNavbar">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="homeNavbar">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-3">
+                    <li class="nav-item"><a class="nav-link text-light fw-medium" href="#weather-bg"><i class="fas fa-home me-1"></i> Home</a></li>
+                    <li class="nav-item"><a class="nav-link text-light fw-medium" href="#preview"><i class="fas fa-tower-broadcast me-1"></i> Live Climate</a></li>
+                    <li class="nav-item"><a class="nav-link text-light fw-medium" href="#about"><i class="fas fa-circle-info me-1"></i> Project Info</a></li>
+                    <li class="nav-item"><a class="nav-link text-light fw-medium" href="#knowledge"><i class="fas fa-book-open me-1"></i> Knowledge Hub</a></li>
+                    <li class="nav-item"><a class="nav-link text-light fw-medium" href="#faq"><i class="fas fa-circle-question me-1"></i> FAQ</a></li>
+                </ul>
+                <div class="d-flex gap-2">
+                    <a href="{% url 'accounts:login' %}" class="btn btn-sm btn-outline-glass px-3 py-2"><i class="fas fa-sign-in-alt me-1"></i> Log In</a>
+                    <a href="{% url 'accounts:register' %}" class="btn btn-sm btn-glow px-3 py-2"><i class="fas fa-user-plus me-1"></i> Sign Up</a>
+                </div>
             </div>
         </div>
     </nav>
@@ -724,8 +744,64 @@
         </div>
     </section>
 
+    <!-- Project Information Section -->
+    <section id="about" class="container py-5">
+        <h2 class="section-title">Project Information & Architecture</h2>
+        <p class="section-subtitle">A professional meteorological data structures and climate tracking portal designed for Pakistan's major cities.</p>
+        
+        <div class="row g-4 align-items-stretch">
+            <div class="col-lg-6">
+                <div class="glass-card h-100 p-4 d-flex flex-column justify-content-between">
+                    <div>
+                        <h3 class="fw-bold mb-3 text-light" style="font-size: 1.35rem;"><i class="fas fa-microchip me-2 text-cyan"></i>System Architecture</h3>
+                        <p class="text-secondary" style="line-height: 1.7; font-size: 0.95rem;">
+                            The <strong>Pakistan Weather Analytics Portal (PWAP)</strong> is engineered as a robust, full-stack climate monitoring application. By leveraging modern Python-Django design patterns, the system offers real-time client-side synchronization and background database ingestion.
+                        </p>
+                        <p class="text-secondary mb-0" style="line-height: 1.7; font-size: 0.95rem;">
+                            Real-time cards fetch live meteorological conditions from the <strong>Open-Meteo API</strong> directly via clients, reducing server overhead. Concurrently, a background daemon threads synchronization mechanism polls 90-day archive logs to maintain historical query parameters without blocking server execution workers.
+                        </p>
+                    </div>
+                    <div class="row mt-4 g-3">
+                        <div class="col-sm-6">
+                            <div class="p-3 rounded" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); height: 100%;">
+                                <h5 class="fw-bold text-light mb-1" style="font-size: 0.85rem;"><i class="fab fa-python text-warning me-1"></i> Backend Architecture</h5>
+                                <span class="text-secondary" style="font-size: 0.72rem; line-height: 1.3;">Django, SQLite3 Database, Whitenoise static, Custom Thread pool loaders</span>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="p-3 rounded" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); height: 100%;">
+                                <h5 class="fw-bold text-light mb-1" style="font-size: 0.85rem;"><i class="fas fa-code text-cyan me-1"></i> Presentation Layer</h5>
+                                <span class="text-secondary" style="font-size: 0.72rem; line-height: 1.3;">Bootstrap 5, Glassmorphism gradients, CSS Particle falling, Chart.js trends</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-6">
+                <div class="glass-card h-100 p-4 d-flex flex-column justify-content-between">
+                    <div>
+                        <h3 class="fw-bold mb-3 text-light" style="font-size: 1.35rem;"><i class="fas fa-server me-2 text-warning"></i>Key Analytics & Variables</h3>
+                        <p class="text-secondary" style="line-height: 1.7; font-size: 0.95rem;">
+                            The database tracks several vital weather parameters necessary for professional climate insights:
+                        </p>
+                        <ul class="list-unstyled text-secondary mt-3" style="font-size: 0.9rem; line-height: 2.1;">
+                            <li><i class="fas fa-check-circle text-cyan me-2"></i><strong>Apparent Temperature (Feels Like)</strong>: Combines wind chill and humidity factors to assess human heat stress index.</li>
+                            <li><i class="fas fa-check-circle text-cyan me-2"></i><strong>Relative Humidity (%)</strong>: Evaluates air water vapor density which governs transpiration, precipitation probability, and fog formation.</li>
+                            <li><i class="fas fa-check-circle text-cyan me-2"></i><strong>Precipitation Accumulation (mm)</strong>: Stores precipitation depth to track rain volume patterns.</li>
+                            <li><i class="fas fa-check-circle text-cyan me-2"></i><strong>Wind Velocity & Direction</strong>: Observes wind force metrics to map regional circulation patterns.</li>
+                        </ul>
+                    </div>
+                    <p class="text-secondary mb-0 mt-3" style="line-height: 1.7; font-size: 0.95rem;">
+                        When signed in, users can search this database, run regression trend lines, download PDF/CSV reports, and activate automated daily email updates.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- Weather Knowledge Hub -->
-    <section class="container py-5">
+    <section class="container py-5" id="knowledge">
         <h2 class="section-title">Weather Knowledge Center</h2>
         <p class="section-subtitle">Learn the fundamental meteorological principles driving our climate and analytics engines.</p>
         
@@ -781,7 +857,7 @@
     </section>
 
     <!-- FAQ Accordion -->
-    <section class="container py-5" style="max-width: 800px;">
+    <section class="container py-5" id="faq" style="max-width: 800px;">
         <h2 class="section-title">Frequently Asked Questions</h2>
         <p class="section-subtitle">Answers to common inquiries about the Weather Analytics Portal.</p>
         
@@ -1096,14 +1172,35 @@
             } else {
                 // Partly Cloudy / Overcast / Foggy / Default
                 bg.classList.add('weather-cloudy');
-                for (let i = 0; i < 4; i++) {
+                // Next-level volumetric cloud drifting layers
+                for (let i = 0; i < 6; i++) {
                     const cloud = document.createElement('div');
                     cloud.className = 'cloud-drift';
-                    cloud.style.top = `${12 + Math.random() * 40}%`;
-                    cloud.style.width = `${220 + Math.random() * 180}px`;
-                    cloud.style.height = `${90 + Math.random() * 70}px`;
-                    cloud.style.animationDelay = `${-Math.random() * 40}s`;
-                    cloud.style.animationDuration = `${35 + Math.random() * 20}s`;
+                    const depth = i % 3;
+                    
+                    if (depth === 0) {
+                        cloud.style.width = `${360 + Math.random() * 240}px`;
+                        cloud.style.height = `${150 + Math.random() * 90}px`;
+                        cloud.style.filter = 'blur(22px)';
+                        cloud.style.opacity = '0.45';
+                        cloud.style.animationDuration = `${80 + Math.random() * 25}s`;
+                    } else if (depth === 1) {
+                        cloud.style.width = `${240 + Math.random() * 160}px`;
+                        cloud.style.height = `${110 + Math.random() * 70}px`;
+                        cloud.style.filter = 'blur(14px)';
+                        cloud.style.opacity = '0.7';
+                        cloud.style.animationDuration = `${58 + Math.random() * 18}s`;
+                    } else {
+                        cloud.style.width = `${150 + Math.random() * 100}px`;
+                        cloud.style.height = `${75 + Math.random() * 45}px`;
+                        cloud.style.filter = 'blur(9px)';
+                        cloud.style.opacity = '0.9';
+                        cloud.style.animationDuration = `${38 + Math.random() * 12}s`;
+                    }
+                    
+                    cloud.style.top = `${10 + Math.random() * 45}%`;
+                    cloud.style.left = `${-600}px`;
+                    cloud.style.animationDelay = `${-Math.random() * 80}s`;
                     effectsContainer.appendChild(cloud);
                 }
             }
