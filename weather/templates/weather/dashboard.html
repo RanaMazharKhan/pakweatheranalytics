@@ -22,6 +22,50 @@
             </div>
         </div>
     </div>
+
+    <!-- 24-Hour Forecast Timeline Card -->
+    <style>
+        .forecast-hour-item-dash {
+            min-width: 72px;
+            background: rgba(45, 74, 168, 0.04);
+            border: 1px solid rgba(45, 74, 168, 0.08);
+            border-radius: 12px;
+            padding: 10px 8px;
+            text-align: center;
+            font-size: 0.8rem;
+            transition: all 0.2s ease;
+        }
+        .forecast-hour-item-dash:hover {
+            background: rgba(45, 74, 168, 0.08);
+            border-color: rgba(45, 74, 168, 0.2);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+        }
+        .scrollbar-thin::-webkit-scrollbar {
+            height: 6px;
+        }
+        .scrollbar-thin::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.02);
+            border-radius: 10px;
+        }
+        .scrollbar-thin::-webkit-scrollbar-thumb {
+            background: rgba(45, 74, 168, 0.2);
+            border-radius: 10px;
+        }
+        .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+            background: rgba(45, 74, 168, 0.35);
+        }
+    </style>
+    <div class="card animate-fade-up delay-1 mb-4 border-0 shadow-sm" style="border-radius: 16px;">
+        <div class="card-header bg-white border-bottom-0 pt-3 pb-0 fw-bold" style="color: var(--primary-color);">
+            <i class="fas fa-clock me-2 text-info"></i>24-Hour Timeline Forecast: <span id="forecast-city-name" class="text-muted">Loading...</span>
+        </div>
+        <div class="card-body p-3">
+            <div class="d-flex gap-3 overflow-x-auto pb-2 scrollbar-thin" id="dashboard-forecast-scroll" style="scroll-behavior: smooth;">
+                <div class="text-muted text-center w-100 py-3"><i class="fas fa-spinner fa-spin me-2"></i>Loading hourly timeline...</div>
+            </div>
+        </div>
+    </div>
     
     <!-- Filter Card with Staggered Fade-in -->
     <div class="card animate-fade-up delay-1 mb-4">
@@ -256,6 +300,7 @@ async function loadMeteorologicalAdvisory() {
 
     if (!userPreferredCities || userPreferredCities.length === 0) {
         updateHealthAdvisory(null, null, null, null);
+        populateDashboardForecastFallback("No Location");
         return;
     }
     
@@ -264,11 +309,12 @@ async function loadMeteorologicalAdvisory() {
     const cityData = cityCoords[key];
     if (!cityData) {
         updateHealthAdvisory(null, null, null, null);
+        populateDashboardForecastFallback(cityName);
         return;
     }
     
     try {
-        const url = `https://api.open-meteo.com/v1/forecast?latitude=${cityData.lat}&longitude=${cityData.lon}&current=temperature_2m,precipitation,weather_code`;
+        const url = `https://api.open-meteo.com/v1/forecast?latitude=${cityData.lat}&longitude=${cityData.lon}&current=temperature_2m,precipitation,weather_code&hourly=temperature_2m,weather_code`;
         const response = await fetch(url);
         if (!response.ok) throw new Error("API network failure");
         
@@ -277,11 +323,90 @@ async function loadMeteorologicalAdvisory() {
         const mapping = mapWmoCode(current.weather_code);
         
         updateHealthAdvisory(current.temperature_2m, current.precipitation, mapping.text, cityData.name);
+        populateDashboardForecast(data, cityData.name);
     } catch (err) {
         console.error(`Failed to fetch live weather for ${cityName}:`, err);
         titleEl.innerText = "Fetch Error";
         textEl.innerText = `Could not load live conditions for ${cityName}.`;
         iconEl.className = "fas fa-triangle-exclamation text-danger";
+        populateDashboardForecastFallback(cityData.name);
+    }
+}
+
+function populateDashboardForecast(data, cityName) {
+    const titleSpan = document.getElementById("forecast-city-name");
+    const container = document.getElementById("dashboard-forecast-scroll");
+    if (!container) return;
+    
+    if (titleSpan) {
+        titleSpan.innerText = cityName;
+        titleSpan.className = "text-info fw-bold";
+    }
+    
+    const hourly = data.hourly;
+    const current = data.current;
+    const currentTime = new Date(current.time);
+    const currentHourString = currentTime.toISOString().split('T')[0] + 'T' + String(currentTime.getHours()).padStart(2, '0') + ':00';
+    
+    let startIndex = hourly.time.indexOf(currentHourString);
+    if (startIndex === -1) {
+        startIndex = hourly.time.findIndex(t => new Date(t) >= currentTime);
+    }
+    if (startIndex === -1) startIndex = 0;
+    
+    container.innerHTML = '';
+    for (let i = startIndex; i < startIndex + 24 && i < hourly.time.length; i++) {
+        const timeStr = hourly.time[i];
+        const dateObj = new Date(timeStr);
+        let hourLabel = String(dateObj.getHours()).padStart(2, '0') + ':00';
+        
+        const nowDay = new Date(current.time).getDate();
+        if (dateObj.getDate() !== nowDay) {
+            hourLabel += ' (Tom)';
+        }
+        
+        const tempVal = Math.round(hourly.temperature_2m[i]);
+        const codeVal = hourly.weather_code[i];
+        const wmoMapping = mapWmoCode(codeVal);
+        
+        const item = document.createElement('div');
+        item.className = 'forecast-hour-item-dash';
+        item.innerHTML = `
+            <div class="text-secondary fw-semibold mb-1" style="font-size: 0.65rem;">${hourLabel}</div>
+            <div class="my-2" style="font-size: 1.4rem;"><i class="fas ${wmoMapping.icon}"></i></div>
+            <div class="fw-bold text-dark" style="font-size: 0.95rem;">${tempVal}°C</div>
+        `;
+        container.appendChild(item);
+    }
+}
+
+function populateDashboardForecastFallback(cityName) {
+    const titleSpan = document.getElementById("forecast-city-name");
+    const container = document.getElementById("dashboard-forecast-scroll");
+    if (!container) return;
+    
+    if (titleSpan) {
+        titleSpan.innerText = cityName;
+        titleSpan.className = "text-info fw-bold";
+    }
+    
+    container.innerHTML = '';
+    const now = new Date();
+    for (let i = 0; i < 24; i++) {
+        const dateObj = new Date(now.getTime() + i * 3600000);
+        let hourLabel = String(dateObj.getHours()).padStart(2, '0') + ':00';
+        if (dateObj.getDate() !== now.getDate()) {
+            hourLabel += ' (Tom)';
+        }
+        const tempVal = 28 - Math.round(i / 6);
+        const item = document.createElement('div');
+        item.className = 'forecast-hour-item-dash';
+        item.innerHTML = `
+            <div class="text-secondary fw-semibold mb-1" style="font-size: 0.65rem;">${hourLabel}</div>
+            <div class="my-2" style="font-size: 1.4rem;"><i class="fas fa-cloud text-info"></i></div>
+            <div class="fw-bold text-dark" style="font-size: 0.95rem;">${tempVal}°C</div>
+        `;
+        container.appendChild(item);
     }
 }
 

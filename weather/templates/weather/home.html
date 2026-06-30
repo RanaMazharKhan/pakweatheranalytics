@@ -33,11 +33,162 @@
 
         body {
             font-family: 'Outfit', sans-serif;
-            background: radial-gradient(circle at top, #1e1b4b, var(--primary-bg));
             color: var(--text-main);
             margin: 0;
             padding: 0;
+            background: #0f172a;
             min-height: 100vh;
+        }
+
+        #weather-bg {
+            min-height: 100vh;
+            background: radial-gradient(circle at top, #1e1b4b, var(--primary-bg));
+            transition: background 1.8s ease-in-out;
+            position: relative;
+            z-index: 0;
+        }
+
+        /* Weather specific backgrounds */
+        .weather-sunny {
+            background: radial-gradient(circle at top, #0284c7 0%, #0f172a 75%) !important;
+        }
+        .weather-cloudy {
+            background: radial-gradient(circle at top, #475569 0%, #0f172a 80%) !important;
+        }
+        .weather-rainy {
+            background: radial-gradient(circle at top, #1e293b 0%, #090d16 85%) !important;
+        }
+        .weather-thunderstorm {
+            background: radial-gradient(circle at top, #111827 0%, #020617 90%) !important;
+        }
+        .weather-snowy {
+            background: radial-gradient(circle at top, #0c4a6e 0%, #0f172a 75%) !important;
+        }
+
+        #weather-effects {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* Rain Particle styling */
+        .rain-drop {
+            position: absolute;
+            background: linear-gradient(transparent, rgba(56, 189, 248, 0.4));
+            width: 1.5px;
+            height: 40px;
+            opacity: 0.7;
+            animation: fall 1.2s linear infinite;
+        }
+        @keyframes fall {
+            0% { transform: translateY(-50px); }
+            100% { transform: translateY(100vh); }
+        }
+
+        /* Snow Particle styling */
+        .snowflake {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            opacity: 0.8;
+            animation: snowfall 5s linear infinite;
+        }
+        @keyframes snowfall {
+            0% { transform: translateY(-10px) translateX(0); }
+            50% { transform: translateY(50vh) translateX(25px); }
+            100% { transform: translateY(100vh) translateX(-25px); }
+        }
+
+        /* Lightning Flash overlay */
+        .lightning-flash {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(255, 255, 255, 0.95);
+            opacity: 0;
+            z-index: 9999;
+            pointer-events: none;
+            animation: flash 6s infinite;
+        }
+        @keyframes flash {
+            0%, 94%, 97%, 100% { opacity: 0; }
+            95%, 96% { opacity: 0.85; }
+        }
+
+        /* Sunny lens/beams effect */
+        .sunray {
+            position: absolute;
+            top: -15%;
+            right: -15%;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(245, 166, 35, 0.18) 0%, transparent 70%);
+            border-radius: 50%;
+            animation: sunpulse 8s ease-in-out infinite;
+        }
+        @keyframes sunpulse {
+            0%, 100% { transform: scale(1); opacity: 0.6; }
+            50% { transform: scale(1.2); opacity: 0.95; }
+        }
+
+        /* Cloudy drifting shapes */
+        .cloud-drift {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.04);
+            filter: blur(15px);
+            border-radius: 50%;
+            animation: drift 45s linear infinite;
+        }
+        @keyframes drift {
+            0% { transform: translateX(-300px); }
+            100% { transform: translateX(110vw); }
+        }
+
+        /* Collapsible forecast drawer styling */
+        .forecast-drawer {
+            transition: all 0.3s ease-in-out;
+        }
+        .forecast-hour-item {
+            min-width: 58px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 12px;
+            padding: 8px 6px;
+            text-align: center;
+            font-size: 0.75rem;
+            transition: all 0.2s ease;
+        }
+        .forecast-hour-item:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(56, 189, 248, 0.2);
+            transform: translateY(-2px);
+        }
+        .scrollbar-thin::-webkit-scrollbar {
+            height: 5px;
+        }
+        .scrollbar-thin::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 10px;
+        }
+        .scrollbar-thin::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 10px;
+        }
+        .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        /* Make main layout visible above background layers */
+        .glass-header, header, section, footer {
+            position: relative;
+            z-index: 2;
         }
 
         /* Glassmorphism Header */
@@ -313,8 +464,9 @@
     </style>
 </head>
 <body>
+    <div id="weather-bg" class="weather-cloudy">
+        <div id="weather-effects"></div>
 
-    <!-- Header Navigation -->
     <nav class="navbar navbar-expand-lg navbar-dark glass-header">
         <div class="container">
             <a class="navbar-brand d-flex align-items-center" href="#">
@@ -368,8 +520,8 @@
         
         <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4" id="live-weather-deck">
             <!-- City 1: Lahore -->
-            <div class="col">
-                <div class="glass-card h-100 p-4 text-center d-flex flex-column justify-content-between position-relative overflow-hidden">
+            <div class="col city-card-col" data-city-id="lahore" style="cursor: pointer;">
+                <div class="glass-card h-100 p-4 text-center d-flex flex-column justify-content-between position-relative overflow-hidden" style="transition: all 0.3s ease;">
                     <div class="position-absolute top-0 start-0 m-3 d-flex align-items-center">
                         <span class="live-pulse"></span>
                         <small class="text-secondary ms-1 fw-bold" style="font-size: 0.75rem; letter-spacing: 0.5px;">LIVE</small>
@@ -403,12 +555,20 @@
                             <span class="text-light fw-semibold" id="rain-lahore">-- mm</span>
                         </div>
                     </div>
+                    <button class="btn btn-sm btn-outline-glass w-100 mt-3 py-1 btn-forecast-toggle" data-city-id="lahore" style="font-size: 0.8rem; border-radius: 10px;">
+                        <i class="fas fa-clock me-1"></i> 24h Forecast
+                    </button>
+                    <div class="forecast-drawer mt-3 d-none" id="forecast-drawer-lahore">
+                        <div class="d-flex gap-2 overflow-x-auto pb-2 scrollbar-thin" id="forecast-scroll-lahore" style="scroll-behavior: smooth;">
+                            <!-- Hourly items dynamically injected -->
+                        </div>
+                    </div>
                 </div>
             </div>
             
             <!-- City 2: Karachi -->
-            <div class="col">
-                <div class="glass-card h-100 p-4 text-center d-flex flex-column justify-content-between position-relative overflow-hidden">
+            <div class="col city-card-col" data-city-id="karachi" style="cursor: pointer;">
+                <div class="glass-card h-100 p-4 text-center d-flex flex-column justify-content-between position-relative overflow-hidden" style="transition: all 0.3s ease;">
                     <div class="position-absolute top-0 start-0 m-3 d-flex align-items-center">
                         <span class="live-pulse"></span>
                         <small class="text-secondary ms-1 fw-bold" style="font-size: 0.75rem; letter-spacing: 0.5px;">LIVE</small>
@@ -442,12 +602,20 @@
                             <span class="text-light fw-semibold" id="rain-karachi">-- mm</span>
                         </div>
                     </div>
+                    <button class="btn btn-sm btn-outline-glass w-100 mt-3 py-1 btn-forecast-toggle" data-city-id="karachi" style="font-size: 0.8rem; border-radius: 10px;">
+                        <i class="fas fa-clock me-1"></i> 24h Forecast
+                    </button>
+                    <div class="forecast-drawer mt-3 d-none" id="forecast-drawer-karachi">
+                        <div class="d-flex gap-2 overflow-x-auto pb-2 scrollbar-thin" id="forecast-scroll-karachi" style="scroll-behavior: smooth;">
+                            <!-- Hourly items dynamically injected -->
+                        </div>
+                    </div>
                 </div>
             </div>
             
             <!-- City 3: Islamabad -->
-            <div class="col">
-                <div class="glass-card h-100 p-4 text-center d-flex flex-column justify-content-between position-relative overflow-hidden">
+            <div class="col city-card-col" data-city-id="islamabad" style="cursor: pointer;">
+                <div class="glass-card h-100 p-4 text-center d-flex flex-column justify-content-between position-relative overflow-hidden" style="transition: all 0.3s ease;">
                     <div class="position-absolute top-0 start-0 m-3 d-flex align-items-center">
                         <span class="live-pulse"></span>
                         <small class="text-secondary ms-1 fw-bold" style="font-size: 0.75rem; letter-spacing: 0.5px;">LIVE</small>
@@ -481,12 +649,20 @@
                             <span class="text-light fw-semibold" id="rain-islamabad">-- mm</span>
                         </div>
                     </div>
+                    <button class="btn btn-sm btn-outline-glass w-100 mt-3 py-1 btn-forecast-toggle" data-city-id="islamabad" style="font-size: 0.8rem; border-radius: 10px;">
+                        <i class="fas fa-clock me-1"></i> 24h Forecast
+                    </button>
+                    <div class="forecast-drawer mt-3 d-none" id="forecast-drawer-islamabad">
+                        <div class="d-flex gap-2 overflow-x-auto pb-2 scrollbar-thin" id="forecast-scroll-islamabad" style="scroll-behavior: smooth;">
+                            <!-- Hourly items dynamically injected -->
+                        </div>
+                    </div>
                 </div>
             </div>
             
             <!-- City 4: Peshawar -->
-            <div class="col">
-                <div class="glass-card h-100 p-4 text-center d-flex flex-column justify-content-between position-relative overflow-hidden">
+            <div class="col city-card-col" data-city-id="peshawar" style="cursor: pointer;">
+                <div class="glass-card h-100 p-4 text-center d-flex flex-column justify-content-between position-relative overflow-hidden" style="transition: all 0.3s ease;">
                     <div class="position-absolute top-0 start-0 m-3 d-flex align-items-center">
                         <span class="live-pulse"></span>
                         <small class="text-secondary ms-1 fw-bold" style="font-size: 0.75rem; letter-spacing: 0.5px;">LIVE</small>
@@ -518,6 +694,14 @@
                         <div class="d-flex justify-content-between">
                             <span><i class="fas fa-cloud-showers-water me-2 text-primary"></i> Rain:</span>
                             <span class="text-light fw-semibold" id="rain-peshawar">-- mm</span>
+                        </div>
+                    </div>
+                    <button class="btn btn-sm btn-outline-glass w-100 mt-3 py-1 btn-forecast-toggle" data-city-id="peshawar" style="font-size: 0.8rem; border-radius: 10px;">
+                        <i class="fas fa-clock me-1"></i> 24h Forecast
+                    </button>
+                    <div class="forecast-drawer mt-3 d-none" id="forecast-drawer-peshawar">
+                        <div class="d-flex gap-2 overflow-x-auto pb-2 scrollbar-thin" id="forecast-scroll-peshawar" style="scroll-behavior: smooth;">
+                            <!-- Hourly items dynamically injected -->
                         </div>
                     </div>
                 </div>
@@ -757,6 +941,55 @@
                     document.getElementById(`humid-${city.id}`).innerText = `${current.relative_humidity_2m}%`;
                     document.getElementById(`wind-${city.id}`).innerText = `${current.wind_speed_10m} km/h`;
                     document.getElementById(`rain-${city.id}`).innerText = `${current.precipitation} mm`;
+
+                    // Populate Hourly Forecast
+                    const hourly = data.hourly;
+                    const currentTime = new Date(current.time);
+                    const currentHourString = currentTime.toISOString().split('T')[0] + 'T' + String(currentTime.getHours()).padStart(2, '0') + ':00';
+                    
+                    let startIndex = hourly.time.indexOf(currentHourString);
+                    if (startIndex === -1) {
+                        startIndex = hourly.time.findIndex(t => new Date(t) >= currentTime);
+                    }
+                    if (startIndex === -1) startIndex = 0;
+                    
+                    const forecastContainer = document.getElementById(`forecast-scroll-${city.id}`);
+                    if (forecastContainer) {
+                        forecastContainer.innerHTML = '';
+                        for (let i = startIndex; i < startIndex + 24 && i < hourly.time.length; i++) {
+                            const timeStr = hourly.time[i];
+                            const dateObj = new Date(timeStr);
+                            let hourLabel = String(dateObj.getHours()).padStart(2, '0') + ':00';
+                            
+                            const tempVal = Math.round(hourly.temperature_2m[i]);
+                            const codeVal = hourly.weather_code[i];
+                            const wmoMapping = mapWmoCode(codeVal);
+                            
+                            let iconClass = 'fa-cloud';
+                            const match = wmoMapping.icon.match(/fa-[a-z0-9-]+/i);
+                            if (match) {
+                                iconClass = match[0];
+                            }
+                            
+                            const item = document.createElement('div');
+                            item.className = 'forecast-hour-item';
+                            item.innerHTML = `
+                                <div class="text-secondary" style="font-size: 0.65rem;">${hourLabel}</div>
+                                <div class="my-1" style="font-size: 1rem;"><i class="fas ${iconClass} text-cyan"></i></div>
+                                <div class="fw-bold text-light">${tempVal}°</div>
+                            `;
+                            forecastContainer.appendChild(item);
+                        }
+                    }
+
+                    // On initial load, set theme to match Lahore (first city)
+                    if (city.id === "lahore") {
+                        setWeatherTheme(mapping.text);
+                        const lahoreCard = document.querySelector('[data-city-id="lahore"] .glass-card');
+                        if (lahoreCard) {
+                            lahoreCard.style.borderColor = 'var(--accent-cyan)';
+                        }
+                    }
                     
                 } catch (error) {
                     console.error(`Failed to fetch weather for ${city.name}:`, error);
@@ -777,12 +1010,159 @@
                     document.getElementById(`humid-${city.id}`).innerText = `${fb.humid}%`;
                     document.getElementById(`wind-${city.id}`).innerText = `${fb.wind} km/h`;
                     document.getElementById(`rain-${city.id}`).innerText = `${fb.rain} mm`;
+
+                    // Populate fallback forecast drawer
+                    const forecastContainer = document.getElementById(`forecast-scroll-${city.id}`);
+                    if (forecastContainer) {
+                        forecastContainer.innerHTML = '';
+                        const now = new Date();
+                        for (let i = 0; i < 24; i++) {
+                            const dateObj = new Date(now.getTime() + i * 3600000);
+                            const hourLabel = String(dateObj.getHours()).padStart(2, '0') + ':00';
+                            const tempVal = fb.temp - Math.round(i / 6);
+                            const item = document.createElement('div');
+                            item.className = 'forecast-hour-item';
+                            item.innerHTML = `
+                                <div class="text-secondary" style="font-size: 0.65rem;">${hourLabel}</div>
+                                <div class="my-1" style="font-size: 1rem;"><i class="fas fa-cloud text-cyan"></i></div>
+                                <div class="fw-bold text-light">${tempVal}°</div>
+                            `;
+                            forecastContainer.appendChild(item);
+                        }
+                    }
+
+                    if (city.id === "lahore") {
+                        setWeatherTheme(fb.condition);
+                    }
                 }
             }
         }
 
-        // Run fetch on load
-        window.addEventListener("DOMContentLoaded", fetchLiveWeather);
+        // Live Background & Particle Weather Theme Engine
+        function setWeatherTheme(condition) {
+            const bg = document.getElementById('weather-bg');
+            const effectsContainer = document.getElementById('weather-effects');
+            if (!bg || !effectsContainer) return;
+
+            effectsContainer.innerHTML = ''; // Clear previous particles
+            bg.className = ''; // Reset CSS weather class
+
+            if (condition.includes("Sunny") || condition.includes("Clear")) {
+                bg.classList.add('weather-sunny');
+                const ray = document.createElement('div');
+                ray.className = 'sunray';
+                effectsContainer.appendChild(ray);
+            } else if (condition.includes("Rain") || condition.includes("Showers") || condition.includes("Drizzle")) {
+                bg.classList.add('weather-rainy');
+                for (let i = 0; i < 55; i++) {
+                    const drop = document.createElement('div');
+                    drop.className = 'rain-drop';
+                    drop.style.left = `${Math.random() * 100}%`;
+                    drop.style.top = `${-40 - Math.random() * 40}px`;
+                    drop.style.animationDelay = `${Math.random() * 1.5}s`;
+                    drop.style.animationDuration = `${0.7 + Math.random() * 0.4}s`;
+                    effectsContainer.appendChild(drop);
+                }
+            } else if (condition.includes("Thunderstorm")) {
+                bg.classList.add('weather-thunderstorm');
+                
+                // Add lightning flash element
+                const flash = document.createElement('div');
+                flash.className = 'lightning-flash';
+                effectsContainer.appendChild(flash);
+
+                for (let i = 0; i < 50; i++) {
+                    const drop = document.createElement('div');
+                    drop.className = 'rain-drop';
+                    drop.style.left = `${Math.random() * 100}%`;
+                    drop.style.top = `${-40 - Math.random() * 40}px`;
+                    drop.style.animationDelay = `${Math.random() * 1.5}s`;
+                    drop.style.animationDuration = `${0.7 + Math.random() * 0.4}s`;
+                    effectsContainer.appendChild(drop);
+                }
+            } else if (condition.includes("Snow") || condition.includes("Ice")) {
+                bg.classList.add('weather-snowy');
+                for (let i = 0; i < 35; i++) {
+                    const flake = document.createElement('div');
+                    flake.className = 'snowflake';
+                    flake.style.left = `${Math.random() * 100}%`;
+                    flake.style.top = `-15px`;
+                    flake.style.width = `${3 + Math.random() * 5}px`;
+                    flake.style.height = flake.style.width;
+                    flake.style.animationDelay = `${Math.random() * 5}s`;
+                    flake.style.animationDuration = `${4 + Math.random() * 3}s`;
+                    effectsContainer.appendChild(flake);
+                }
+            } else {
+                // Partly Cloudy / Overcast / Foggy / Default
+                bg.classList.add('weather-cloudy');
+                for (let i = 0; i < 4; i++) {
+                    const cloud = document.createElement('div');
+                    cloud.className = 'cloud-drift';
+                    cloud.style.top = `${12 + Math.random() * 40}%`;
+                    cloud.style.width = `${220 + Math.random() * 180}px`;
+                    cloud.style.height = `${90 + Math.random() * 70}px`;
+                    cloud.style.animationDelay = `${-Math.random() * 40}s`;
+                    cloud.style.animationDuration = `${35 + Math.random() * 20}s`;
+                    effectsContainer.appendChild(cloud);
+                }
+            }
+        }
+
+        // Initialize click events for city-focused backgrounds
+        function initializeCardClicks() {
+            document.querySelectorAll('.city-card-col').forEach(card => {
+                card.addEventListener('click', () => {
+                    // Reset card borders
+                    document.querySelectorAll('.city-card-col .glass-card').forEach(gc => {
+                        gc.style.borderColor = 'rgba(255, 255, 255, 0.08)';
+                        gc.style.boxShadow = '0 20px 40px rgba(0, 0, 0, 0.3)';
+                    });
+                    
+                    // Highlight active card
+                    const glassCard = card.querySelector('.glass-card');
+                    glassCard.style.borderColor = 'var(--accent-cyan)';
+                    glassCard.style.boxShadow = '0 20px 45px rgba(56, 189, 248, 0.15)';
+                    
+                    // Change background theme to match selected city condition
+                    const conditionElement = document.getElementById(`cond-${card.dataset.cityId}`);
+                    if (conditionElement) {
+                        setWeatherTheme(conditionElement.innerText);
+                    }
+                });
+            });
+
+            // Handle forecast drawer toggle clicks
+            document.querySelectorAll('.btn-forecast-toggle').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation(); // Stop click from bubbling up to parent card select
+                    const cityId = btn.dataset.cityId;
+                    const drawer = document.getElementById(`forecast-drawer-${cityId}`);
+                    if (drawer) {
+                        if (drawer.classList.contains('d-none')) {
+                            drawer.classList.remove('d-none');
+                            btn.innerHTML = `<i class="fas fa-chevron-up me-1"></i> Hide Forecast`;
+                        } else {
+                            drawer.classList.add('d-none');
+                            btn.innerHTML = `<i class="fas fa-clock me-1"></i> 24h Forecast`;
+                        }
+                    }
+                });
+            });
+        }
+
+        // Run fetch and initialization
+        async function runSetup() {
+            // First fetch hourly values for cards
+            for (const city of cities) {
+                city.url = `https://api.open-meteo.com/v1/forecast?latitude=${city.lat}&longitude=${city.lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,wind_speed_10m,weather_code&hourly=temperature_2m,weather_code`;
+            }
+            await fetchLiveWeather();
+            initializeCardClicks();
+        }
+
+        window.addEventListener("DOMContentLoaded", runSetup);
     </script>
+    </div>
 </body>
 </html>
