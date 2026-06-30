@@ -198,9 +198,17 @@ def needs_weather_sync(max_age_days=1):
 
 
 import threading
+import os
+from django.conf import settings
+import pandas as pd
+
+sync_lock = threading.Lock()
+is_syncing = False
 
 def ensure_weather_data(force=False):
     """Load weather data if the database is empty or outdated."""
+    if WeatherData.objects.count() == 0:
+        seed_offline_data()
     should_sync, days = needs_weather_sync()
     if force:
         return sync_weather_data(days=DEFAULT_DAYS)
@@ -208,13 +216,43 @@ def ensure_weather_data(force=False):
         return sync_weather_data(days=days)
     return None
 
+def seed_offline_data():
+    try:
+        csv_path = os.path.join(settings.BASE_DIR, 'data', 'sample_weather_data.csv')
+        if os.path.exists(csv_path):
+            df = pd.read_csv(csv_path)
+            df['date'] = pd.to_datetime(df['date']).dt.date
+            count = WeatherData.import_from_dataframe(df)
+            logger.info("Successfully seeded database with %d records of offline sample weather data.", count)
+            return True
+    except Exception as e:
+        logger.exception("Failed to seed database with offline sample weather data: %s", e)
+    return False
 
 def ensure_weather_data_async():
     """Start weather synchronization in a background thread to prevent blocking web requests."""
+    global is_syncing
+    
+    if WeatherData.objects.count() == 0:
+        seed_offline_data()
+        
+    if is_syncing:
+        logger.info("Weather data sync is already running in background, skipping thread spawn.")
+        return
+        
     try:
         should_sync, days = needs_weather_sync()
         if should_sync:
-            thread = threading.Thread(target=sync_weather_data, kwargs={'days': days})
+            def run_sync():
+                global is_syncing
+                with sync_lock:
+                    is_syncing = True
+                    try:
+                        sync_weather_data(days=days)
+                    finally:
+                        is_syncing = False
+                        
+            thread = threading.Thread(target=run_sync)
             thread.daemon = True
             thread.start()
             logger.info("Started background weather sync thread for %d days", days)

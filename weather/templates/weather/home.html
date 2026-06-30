@@ -1021,7 +1021,8 @@
                     // Populate Hourly Forecast
                     const hourly = data.hourly;
                     const currentTime = new Date(current.time);
-                    const currentHourString = currentTime.toISOString().split('T')[0] + 'T' + String(currentTime.getHours()).padStart(2, '0') + ':00';
+                    const timeParts = current.time.split(':');
+                    const currentHourString = timeParts[0] + ':00';
                     
                     let startIndex = hourly.time.indexOf(currentHourString);
                     if (startIndex === -1) {
