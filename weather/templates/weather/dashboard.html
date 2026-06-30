@@ -188,6 +188,7 @@
 {% endblock %}
 {% block extra_js %}
 <script>
+(function() {
 // Chart Styling Constants
 const chartGridColor = '#e2e8f0';
 const chartTitleColor = '#64748b';
@@ -452,5 +453,6 @@ function updateHealthAdvisory(temp, rain, cond, cityName) {
 }
 
 window.addEventListener("DOMContentLoaded", loadMeteorologicalAdvisory);
+})();
 </script>
 {% endblock %}
