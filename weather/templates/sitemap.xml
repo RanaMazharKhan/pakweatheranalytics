@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://pakweatheranalytics-production.up.railway.app/</loc>
+    <loc>{{ domain }}/</loc>
     <lastmod>2026-06-25</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://pakweatheranalytics-production.up.railway.app/accounts/login/</loc>
+    <loc>{{ domain }}/accounts/login/</loc>
     <lastmod>2026-06-25</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://pakweatheranalytics-production.up.railway.app/accounts/register/</loc>
+    <loc>{{ domain }}/accounts/register/</loc>
     <lastmod>2026-06-25</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>

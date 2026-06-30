@@ -292,3 +292,17 @@ def send_reports_now_view(request):
         f'Daily reports: {sent} sent, {failed} failed, {skipped} already sent today.',
     )
     return redirect('weather:dashboard')
+
+
+def sitemap_view(request):
+    domain = request.build_absolute_uri('/').rstrip('/')
+    if not domain.startswith('https://') and not request.is_secure() and 'localhost' not in domain and '127.0.0.1' not in domain:
+        domain = domain.replace('http://', 'https://')
+    return render(request, 'sitemap.xml', {'domain': domain}, content_type='application/xml')
+
+
+def robots_txt_view(request):
+    domain = request.build_absolute_uri('/').rstrip('/')
+    if not domain.startswith('https://') and not request.is_secure() and 'localhost' not in domain and '127.0.0.1' not in domain:
+        domain = domain.replace('http://', 'https://')
+    return render(request, 'robots.txt', {'domain': domain}, content_type='text/plain')
